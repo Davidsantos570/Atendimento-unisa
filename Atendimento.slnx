@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Atendimento.Api/Atendimento.Api.csproj" />
+    <Project Path="src/Atendimento.Application/Atendimento.Application.csproj" />
+    <Project Path="src/Atendimento.Domain/Atendimento.Domain.csproj" />
+    <Project Path="src/Atendimento.Infrastructure/Atendimento.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Atendimento.Application.Tests/Atendimento.Application.Tests.csproj" />
+    <Project Path="tests/Atendimento.Domain.Tests/Atendimento.Domain.Tests.csproj" />
+  </Folder>
+</Solution>
