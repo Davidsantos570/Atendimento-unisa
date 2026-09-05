@@ -40,9 +40,12 @@ builder.Services.AddDbContext<AtendimentoDbContext>(opcoes =>
 builder.Services.AddScoped<IChamadoRepository, ChamadoRepository>();
 builder.Services.AddScoped<IAlunoRepository, AlunoRepository>();
 builder.Services.AddScoped<IAtendenteRepository, AtendenteRepository>();
+builder.Services.AddScoped<IConvidadoRepository, ConvidadoRepository>();
 builder.Services.AddScoped<IChamadoService, ChamadoService>();
 builder.Services.AddScoped<IAlunoService, AlunoService>();
 builder.Services.AddScoped<IAtendenteService, AtendenteService>();
+builder.Services.AddScoped<IConvidadoService, ConvidadoService>();
+builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 builder.Services.AddScoped<IAutenticacaoService, AutenticacaoService>();
 builder.Services.AddSingleton<IHashDeSenha, HashDeSenhaBCrypt>();
 builder.Services.AddSingleton<IGeradorDeToken, GeradorDeTokenJwt>();

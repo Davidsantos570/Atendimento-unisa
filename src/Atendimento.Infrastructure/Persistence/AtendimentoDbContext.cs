@@ -10,6 +10,7 @@ public class AtendimentoDbContext : DbContext
     public DbSet<Aluno> Alunos => Set<Aluno>();
     public DbSet<Atendente> Atendentes => Set<Atendente>();
     public DbSet<Chamado> Chamados => Set<Chamado>();
+    public DbSet<Convidado> Convidados => Set<Convidado>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -47,6 +48,20 @@ public class AtendimentoDbContext : DbContext
                 mensagem.Property(m => m.Texto).IsRequired().HasMaxLength(4000);
                 mensagem.HasKey("Id");
             });
+        });
+
+        modelBuilder.Entity<Convidado>(builder =>
+        {
+            builder.HasKey(c => c.Id);
+            builder.Property(c => c.Nome).IsRequired().HasMaxLength(200);
+            builder.Property(c => c.Email).IsRequired().HasMaxLength(200);
+            builder.Property(c => c.SenhaHash).IsRequired().HasMaxLength(200);
+            builder.HasIndex(c => c.Email).IsUnique();
+
+            builder.HasOne<Chamado>()
+                .WithMany()
+                .HasForeignKey(c => c.ChamadoId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }

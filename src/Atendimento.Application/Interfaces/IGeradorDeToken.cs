@@ -2,5 +2,5 @@ namespace Atendimento.Application.Interfaces;
 
 public interface IGeradorDeToken
 {
-    (string AccessToken, DateTime ExpiraEm) Gerar(Guid usuarioId, string email, string nome, string papel);
+    (string AccessToken, DateTime ExpiraEm) Gerar(Guid usuarioId, string email, string nome, string papel, Guid? chamadoId);
 }

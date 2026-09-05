@@ -30,6 +30,12 @@ public class ChamadosController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<ChamadoDto>>> Listar()
     {
+        if (EhConvidado())
+        {
+            var chamadoDoConvidado = await _chamadoService.ObterPorIdAsync(ObterChamadoIdDoConvidado());
+            return Ok(chamadoDoConvidado is null ? Enumerable.Empty<ChamadoDto>() : [chamadoDoConvidado]);
+        }
+
         var chamados = await _chamadoService.ListarAsync();
         return Ok(chamados);
     }
@@ -37,6 +43,9 @@ public class ChamadosController : ControllerBase
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<ChamadoDto>> ObterPorId(Guid id)
     {
+        if (EhConvidado() && ObterChamadoIdDoConvidado() != id)
+            return Forbid();
+
         var chamado = await _chamadoService.ObterPorIdAsync(id);
         return chamado is null ? NotFound() : Ok(chamado);
     }
@@ -58,6 +67,7 @@ public class ChamadosController : ControllerBase
     }
 
     [HttpPost("{id:guid}/responder-com-ia")]
+    [Authorize(Roles = $"{Papeis.Aluno},{Papeis.Atendente}")]
     public async Task<ActionResult<ChamadoDto>> ResponderComIa(Guid id, [FromBody] ResponderComIaDto dto)
     {
         var chamado = await _chamadoService.ResponderComIaAsync(id, dto.MensagemAluno);
@@ -66,6 +76,11 @@ public class ChamadosController : ControllerBase
 
     private Guid ObterIdUsuarioAutenticado() =>
         Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
+    private bool EhConvidado() => User.FindFirstValue(ClaimTypes.Role) == Papeis.Convidado;
+
+    private Guid ObterChamadoIdDoConvidado() =>
+        Guid.Parse(User.FindFirstValue(ClaimsPersonalizadas.ChamadoId)!);
 }
 
 public record IniciarAtendimentoDto(Guid AtendenteId);
