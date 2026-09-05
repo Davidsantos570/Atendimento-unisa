@@ -18,9 +18,9 @@ public class ChamadoService : IChamadoService
         _assistenteRespostaService = assistenteRespostaService;
     }
 
-    public async Task<ChamadoDto> AbrirAsync(AbrirChamadoDto dto)
+    public async Task<ChamadoDto> AbrirAsync(AbrirChamadoDto dto, Guid alunoId)
     {
-        var chamado = new Chamado(dto.Titulo, dto.Descricao, dto.AlunoId);
+        var chamado = new Chamado(dto.Titulo, dto.Descricao, alunoId);
         await _chamadoRepository.AdicionarAsync(chamado);
         return Mapear(chamado);
     }

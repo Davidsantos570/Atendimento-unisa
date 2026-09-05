@@ -1,3 +1,4 @@
+using System.Text;
 using Atendimento.Api.Middlewares;
 using Atendimento.Application.Interfaces;
 using Atendimento.Application.Services;
@@ -6,7 +7,9 @@ using Atendimento.Infrastructure.IA;
 using Atendimento.Infrastructure.Persistence;
 using Atendimento.Infrastructure.Repositories;
 using Atendimento.Infrastructure.Seguranca;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,11 +28,33 @@ builder.Services.AddScoped<IAtendenteRepository, AtendenteRepository>();
 builder.Services.AddScoped<IChamadoService, ChamadoService>();
 builder.Services.AddScoped<IAlunoService, AlunoService>();
 builder.Services.AddScoped<IAtendenteService, AtendenteService>();
+builder.Services.AddScoped<IAutenticacaoService, AutenticacaoService>();
 builder.Services.AddSingleton<IHashDeSenha, HashDeSenhaBCrypt>();
+builder.Services.AddSingleton<IGeradorDeToken, GeradorDeTokenJwt>();
 
 builder.Services.Configure<OpcoesGemini>(builder.Configuration.GetSection(OpcoesGemini.Secao));
 builder.Services.AddHttpClient<IAssistenteRespostaService, AssistenteRespostaGemini>(cliente =>
     cliente.BaseAddress = new Uri("https://generativelanguage.googleapis.com/"));
+
+var opcoesJwt = builder.Configuration.GetSection(OpcoesJwt.Secao).Get<OpcoesJwt>() ?? new OpcoesJwt();
+builder.Services.Configure<OpcoesJwt>(builder.Configuration.GetSection(OpcoesJwt.Secao));
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(opcoes =>
+    {
+        opcoes.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = opcoesJwt.Emissor,
+            ValidAudience = opcoesJwt.Audiencia,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(opcoesJwt.Chave))
+        };
+    });
+
+builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
@@ -42,6 +67,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.Run();

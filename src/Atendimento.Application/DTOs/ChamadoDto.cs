@@ -15,4 +15,4 @@ public record ChamadoDto(
 
 public record MensagemDto(string Autor, string Texto, DateTime EnviadaEm);
 
-public record AbrirChamadoDto(string Titulo, string Descricao, Guid AlunoId);
+public record AbrirChamadoDto(string Titulo, string Descricao);
