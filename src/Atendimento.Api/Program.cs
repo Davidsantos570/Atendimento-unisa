@@ -1,5 +1,6 @@
 using System.Text;
 using Atendimento.Api.Middlewares;
+using Atendimento.Api.Swagger;
 using Atendimento.Application.Interfaces;
 using Atendimento.Application.Services;
 using Atendimento.Domain.Repositories;
@@ -10,12 +11,26 @@ using Atendimento.Infrastructure.Seguranca;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(opcoes =>
+{
+    opcoes.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Informe o token JWT recebido no login (sem o prefixo 'Bearer ')."
+    });
+
+    opcoes.OperationFilter<RequisitoDeAutorizacaoOperationFilter>();
+});
 builder.Services.AddExceptionHandler<TratamentoDeExcecoesGlobal>();
 builder.Services.AddProblemDetails();
 
