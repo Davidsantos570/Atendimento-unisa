@@ -19,6 +19,8 @@ public class AtendimentoDbContext : DbContext
             builder.Property(a => a.Nome).IsRequired().HasMaxLength(200);
             builder.Property(a => a.Email).IsRequired().HasMaxLength(200);
             builder.Property(a => a.Matricula).IsRequired().HasMaxLength(50);
+            builder.Property(a => a.SenhaHash).IsRequired().HasMaxLength(200);
+            builder.HasIndex(a => a.Email).IsUnique();
         });
 
         modelBuilder.Entity<Atendente>(builder =>
@@ -27,6 +29,8 @@ public class AtendimentoDbContext : DbContext
             builder.Property(a => a.Nome).IsRequired().HasMaxLength(200);
             builder.Property(a => a.Email).IsRequired().HasMaxLength(200);
             builder.Property(a => a.Setor).IsRequired().HasMaxLength(100);
+            builder.Property(a => a.SenhaHash).IsRequired().HasMaxLength(200);
+            builder.HasIndex(a => a.Email).IsUnique();
         });
 
         modelBuilder.Entity<Chamado>(builder =>
