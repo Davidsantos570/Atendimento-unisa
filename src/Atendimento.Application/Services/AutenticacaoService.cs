@@ -1,3 +1,4 @@
+using Atendimento.Application.Auditoria;
 using Atendimento.Application.Autenticacao;
 using Atendimento.Application.DTOs;
 using Atendimento.Application.Interfaces;
@@ -12,41 +13,57 @@ public class AutenticacaoService : IAutenticacaoService
     private readonly IConvidadoRepository _convidadoRepository;
     private readonly IHashDeSenha _hashDeSenha;
     private readonly IGeradorDeToken _geradorDeToken;
+    private readonly IAuditoriaService _auditoriaService;
 
     public AutenticacaoService(
         IAlunoRepository alunoRepository,
         IAtendenteRepository atendenteRepository,
         IConvidadoRepository convidadoRepository,
         IHashDeSenha hashDeSenha,
-        IGeradorDeToken geradorDeToken)
+        IGeradorDeToken geradorDeToken,
+        IAuditoriaService auditoriaService)
     {
         _alunoRepository = alunoRepository;
         _atendenteRepository = atendenteRepository;
         _convidadoRepository = convidadoRepository;
         _hashDeSenha = hashDeSenha;
         _geradorDeToken = geradorDeToken;
+        _auditoriaService = auditoriaService;
     }
 
     public async Task<TokenDto> LoginAsync(LoginDto dto)
     {
         var aluno = await _alunoRepository.ObterPorEmailAsync(dto.Email);
         if (aluno is not null && _hashDeSenha.VerificarSenha(dto.Senha, aluno.SenhaHash))
-            return GerarToken(aluno.Id, aluno.Email, aluno.Nome, Papeis.Aluno, chamadoId: null);
+            return await GerarTokenComAuditoriaAsync(aluno.Id, aluno.Email, aluno.Nome, Papeis.Aluno, chamadoId: null);
 
         var atendente = await _atendenteRepository.ObterPorEmailAsync(dto.Email);
         if (atendente is not null && _hashDeSenha.VerificarSenha(dto.Senha, atendente.SenhaHash))
-            return GerarToken(atendente.Id, atendente.Email, atendente.Nome, Papeis.Atendente, chamadoId: null);
+            return await GerarTokenComAuditoriaAsync(atendente.Id, atendente.Email, atendente.Nome, Papeis.Atendente, chamadoId: null);
 
         var convidado = await _convidadoRepository.ObterPorEmailAsync(dto.Email);
         if (convidado is not null && _hashDeSenha.VerificarSenha(dto.Senha, convidado.SenhaHash))
-            return GerarToken(convidado.Id, convidado.Email, convidado.Nome, Papeis.Convidado, convidado.ChamadoId);
+            return await GerarTokenComAuditoriaAsync(convidado.Id, convidado.Email, convidado.Nome, Papeis.Convidado, convidado.ChamadoId);
+
+        await _auditoriaService.RegistrarAsync(
+            TiposDeEventoAuditoria.Login,
+            $"Falha no login para o email {dto.Email}: credenciais inválidas.",
+            usuarioId: null,
+            papel: null);
 
         throw new UnauthorizedAccessException("Email ou senha inválidos.");
     }
 
-    private TokenDto GerarToken(Guid usuarioId, string email, string nome, string papel, Guid? chamadoId)
+    private async Task<TokenDto> GerarTokenComAuditoriaAsync(Guid usuarioId, string email, string nome, string papel, Guid? chamadoId)
     {
         var (accessToken, expiraEm) = _geradorDeToken.Gerar(usuarioId, email, nome, papel, chamadoId);
+
+        await _auditoriaService.RegistrarAsync(
+            TiposDeEventoAuditoria.Login,
+            $"Login bem-sucedido para {email}.",
+            usuarioId,
+            papel);
+
         return new TokenDto(accessToken, expiraEm, papel, usuarioId, nome, chamadoId);
     }
 }

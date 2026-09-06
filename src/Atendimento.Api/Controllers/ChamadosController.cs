@@ -62,7 +62,7 @@ public class ChamadosController : ControllerBase
     [Authorize(Roles = Papeis.Atendente)]
     public async Task<ActionResult<ChamadoDto>> Concluir(Guid id)
     {
-        var chamado = await _chamadoService.ConcluirAsync(id);
+        var chamado = await _chamadoService.ConcluirAsync(id, ObterIdUsuarioAutenticado());
         return Ok(chamado);
     }
 
@@ -70,7 +70,8 @@ public class ChamadosController : ControllerBase
     [Authorize(Roles = $"{Papeis.Aluno},{Papeis.Atendente}")]
     public async Task<ActionResult<ChamadoDto>> ResponderComIa(Guid id, [FromBody] ResponderComIaDto dto)
     {
-        var chamado = await _chamadoService.ResponderComIaAsync(id, dto.MensagemAluno);
+        var papel = User.FindFirstValue(ClaimTypes.Role)!;
+        var chamado = await _chamadoService.ResponderComIaAsync(id, dto.MensagemAluno, ObterIdUsuarioAutenticado(), papel);
         return Ok(chamado);
     }
 

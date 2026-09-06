@@ -11,6 +11,7 @@ public class AtendimentoDbContext : DbContext
     public DbSet<Atendente> Atendentes => Set<Atendente>();
     public DbSet<Chamado> Chamados => Set<Chamado>();
     public DbSet<Convidado> Convidados => Set<Convidado>();
+    public DbSet<RegistroAuditoria> RegistrosAuditoria => Set<RegistroAuditoria>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -62,6 +63,17 @@ public class AtendimentoDbContext : DbContext
                 .WithMany()
                 .HasForeignKey(c => c.ChamadoId)
                 .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<RegistroAuditoria>(builder =>
+        {
+            builder.HasKey(r => r.Id);
+            builder.Property(r => r.TipoEvento).IsRequired().HasMaxLength(100);
+            builder.Property(r => r.Descricao).IsRequired().HasMaxLength(1000);
+            builder.Property(r => r.Papel).HasMaxLength(50);
+            builder.Property(r => r.MetodoHttp).HasMaxLength(10);
+            builder.Property(r => r.CaminhoRequisicao).HasMaxLength(500);
+            builder.HasIndex(r => r.DataHoraUtc);
         });
     }
 }

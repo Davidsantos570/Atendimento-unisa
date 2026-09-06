@@ -47,6 +47,8 @@ builder.Services.AddScoped<IAtendenteService, AtendenteService>();
 builder.Services.AddScoped<IConvidadoService, ConvidadoService>();
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 builder.Services.AddScoped<IAutenticacaoService, AutenticacaoService>();
+builder.Services.AddScoped<IRegistroAuditoriaRepository, RegistroAuditoriaRepository>();
+builder.Services.AddScoped<IAuditoriaService, AuditoriaService>();
 builder.Services.AddSingleton<IHashDeSenha, HashDeSenhaBCrypt>();
 builder.Services.AddSingleton<IGeradorDeToken, GeradorDeTokenJwt>();
 
@@ -76,6 +78,7 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
+app.UseMiddleware<RegistroDeRequisicaoMiddleware>();
 app.UseExceptionHandler();
 
 if (app.Environment.IsDevelopment())

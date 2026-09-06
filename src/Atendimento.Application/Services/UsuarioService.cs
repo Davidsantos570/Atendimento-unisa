@@ -1,3 +1,4 @@
+using Atendimento.Application.Auditoria;
 using Atendimento.Application.Autenticacao;
 using Atendimento.Application.DTOs;
 using Atendimento.Application.Interfaces;
@@ -10,15 +11,18 @@ public class UsuarioService : IUsuarioService
     private readonly IAtendenteService _atendenteService;
     private readonly IConvidadoService _convidadoService;
     private readonly IChamadoRepository _chamadoRepository;
+    private readonly IAuditoriaService _auditoriaService;
 
     public UsuarioService(
         IAtendenteService atendenteService,
         IConvidadoService convidadoService,
-        IChamadoRepository chamadoRepository)
+        IChamadoRepository chamadoRepository,
+        IAuditoriaService auditoriaService)
     {
         _atendenteService = atendenteService;
         _convidadoService = convidadoService;
         _chamadoRepository = chamadoRepository;
+        _auditoriaService = auditoriaService;
     }
 
     public Task<UsuarioCriadoDto> CriarAsync(CriarUsuarioDto dto, SolicitanteDto? solicitante) => dto.Papel switch
@@ -34,6 +38,13 @@ public class UsuarioService : IUsuarioService
             throw new ArgumentException("Setor é obrigatório para o papel Atendente.", nameof(dto));
 
         var atendente = await _atendenteService.CadastrarAsync(new CadastrarAtendenteDto(dto.Nome, dto.Email, dto.Setor, dto.Senha));
+
+        await _auditoriaService.RegistrarAsync(
+            TiposDeEventoAuditoria.UsuarioCriado,
+            $"Atendente {atendente.Email} cadastrado.",
+            atendente.Id,
+            Papeis.Atendente);
+
         return new UsuarioCriadoDto(atendente.Id, atendente.Nome, atendente.Email, Papeis.Atendente);
     }
 
@@ -56,6 +67,13 @@ public class UsuarioService : IUsuarioService
             throw new UnauthorizedAccessException("Você não tem permissão para convidar alguém para este chamado.");
 
         var convidado = await _convidadoService.CadastrarAsync(new CadastrarConvidadoDto(dto.Nome, dto.Email, dto.Senha, dto.ChamadoId.Value));
+
+        await _auditoriaService.RegistrarAsync(
+            TiposDeEventoAuditoria.UsuarioCriado,
+            $"Convidado {convidado.Email} cadastrado para o chamado {convidado.ChamadoId} por {solicitante.Papel} {solicitante.Id}.",
+            convidado.Id,
+            Papeis.Convidado);
+
         return new UsuarioCriadoDto(convidado.Id, convidado.Nome, convidado.Email, Papeis.Convidado);
     }
 }
