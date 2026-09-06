@@ -66,13 +66,23 @@ public class ChamadosController : ControllerBase
         return Ok(chamado);
     }
 
-    [HttpPost("{id:guid}/responder-com-ia")]
+    [HttpPost("{id:guid}/mensagens")]
     [Authorize(Roles = $"{Papeis.Aluno},{Papeis.Atendente}")]
-    public async Task<ActionResult<ChamadoDto>> ResponderComIa(Guid id, [FromBody] ResponderComIaDto dto)
+    public async Task<ActionResult<ChamadoDto>> AdicionarMensagem(Guid id, [FromBody] AdicionarMensagemDto dto)
+    {
+        var autor = User.FindFirstValue(ClaimTypes.Name)!;
+        var papel = User.FindFirstValue(ClaimTypes.Role)!;
+        var chamado = await _chamadoService.AdicionarMensagemAsync(id, autor, dto.Texto, ObterIdUsuarioAutenticado(), papel);
+        return Ok(chamado);
+    }
+
+    [HttpPost("{id:guid}/sugestao-ia")]
+    [Authorize(Roles = Papeis.Atendente)]
+    public async Task<ActionResult<SugestaoIaDto>> SugerirRespostaIa(Guid id)
     {
         var papel = User.FindFirstValue(ClaimTypes.Role)!;
-        var chamado = await _chamadoService.ResponderComIaAsync(id, dto.MensagemAluno, ObterIdUsuarioAutenticado(), papel);
-        return Ok(chamado);
+        var sugestao = await _chamadoService.SugerirRespostaIaAsync(id, ObterIdUsuarioAutenticado(), papel);
+        return Ok(new SugestaoIaDto(sugestao));
     }
 
     private Guid ObterIdUsuarioAutenticado() =>
@@ -85,5 +95,3 @@ public class ChamadosController : ControllerBase
 }
 
 public record IniciarAtendimentoDto(Guid AtendenteId);
-
-public record ResponderComIaDto(string MensagemAluno);

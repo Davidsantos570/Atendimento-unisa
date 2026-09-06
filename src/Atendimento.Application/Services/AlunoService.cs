@@ -23,10 +23,10 @@ public class AlunoService : IAlunoService
             throw new InvalidOperationException($"Já existe um aluno cadastrado com o email {dto.Email}.");
 
         var senhaHash = _hashDeSenha.GerarHash(dto.Senha);
-        var aluno = new Aluno(dto.Nome, dto.Email, dto.Matricula, senhaHash);
+        var aluno = new Aluno(dto.Nome, dto.Email, dto.Matricula, dto.Telefone, dto.Curso, senhaHash);
 
         await _alunoRepository.AdicionarAsync(aluno);
 
-        return new AlunoDto(aluno.Id, aluno.Nome, aluno.Email, aluno.Matricula);
+        return new AlunoDto(aluno.Id, aluno.Nome, aluno.Email, aluno.Matricula, aluno.Telefone, aluno.Curso);
     }
 }

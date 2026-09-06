@@ -9,5 +9,6 @@ public interface IChamadoService
     Task<IEnumerable<ChamadoDto>> ListarAsync();
     Task<ChamadoDto> IniciarAtendimentoAsync(Guid chamadoId, Guid atendenteId);
     Task<ChamadoDto> ConcluirAsync(Guid chamadoId, Guid atendenteId);
-    Task<ChamadoDto> ResponderComIaAsync(Guid chamadoId, string mensagemAluno, Guid usuarioId, string papel);
+    Task<ChamadoDto> AdicionarMensagemAsync(Guid chamadoId, string autor, string texto, Guid usuarioId, string papel);
+    Task<string> SugerirRespostaIaAsync(Guid chamadoId, Guid usuarioId, string papel);
 }

@@ -15,12 +15,16 @@ public class AtendimentoDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.HasSequence<int>("ChamadoNumeroSequence").StartsAt(1000).IncrementsBy(1);
+
         modelBuilder.Entity<Aluno>(builder =>
         {
             builder.HasKey(a => a.Id);
             builder.Property(a => a.Nome).IsRequired().HasMaxLength(200);
             builder.Property(a => a.Email).IsRequired().HasMaxLength(200);
             builder.Property(a => a.Matricula).IsRequired().HasMaxLength(50);
+            builder.Property(a => a.Telefone).IsRequired().HasMaxLength(20);
+            builder.Property(a => a.Curso).IsRequired().HasMaxLength(150);
             builder.Property(a => a.SenhaHash).IsRequired().HasMaxLength(200);
             builder.HasIndex(a => a.Email).IsUnique();
         });
@@ -40,6 +44,12 @@ public class AtendimentoDbContext : DbContext
             builder.HasKey(c => c.Id);
             builder.Property(c => c.Titulo).IsRequired().HasMaxLength(200);
             builder.Property(c => c.Descricao).IsRequired().HasMaxLength(2000);
+            builder.Property(c => c.Categoria).IsRequired().HasConversion<string>().HasMaxLength(50);
+
+            builder.Property(c => c.Numero)
+                .ValueGeneratedOnAdd()
+                .HasDefaultValueSql("NEXT VALUE FOR ChamadoNumeroSequence");
+            builder.HasIndex(c => c.Numero).IsUnique();
 
             builder.OwnsMany(c => c.Mensagens, mensagem =>
             {
@@ -48,6 +58,7 @@ public class AtendimentoDbContext : DbContext
                 mensagem.Property(m => m.Autor).IsRequired().HasMaxLength(100);
                 mensagem.Property(m => m.Texto).IsRequired().HasMaxLength(4000);
                 mensagem.HasKey("Id");
+                mensagem.Property(m => m.Id).ValueGeneratedNever();
             });
         });
 

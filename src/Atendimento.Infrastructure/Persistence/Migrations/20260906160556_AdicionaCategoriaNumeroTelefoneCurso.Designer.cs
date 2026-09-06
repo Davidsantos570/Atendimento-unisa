@@ -4,6 +4,7 @@ using Atendimento.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Atendimento.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(AtendimentoDbContext))]
-    partial class AtendimentoDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260906160556_AdicionaCategoriaNumeroTelefoneCurso")]
+    partial class AdicionaCategoriaNumeroTelefoneCurso
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -235,6 +238,7 @@ namespace Atendimento.Infrastructure.Persistence.Migrations
                     b.OwnsMany("Atendimento.Domain.Entities.MensagemChamado", "Mensagens", b1 =>
                         {
                             b1.Property<Guid>("Id")
+                                .ValueGeneratedOnAdd()
                                 .HasColumnType("uniqueidentifier");
 
                             b1.Property<string>("Autor")

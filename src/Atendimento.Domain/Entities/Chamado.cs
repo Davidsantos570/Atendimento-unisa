@@ -7,8 +7,10 @@ public class Chamado
     private readonly List<MensagemChamado> _mensagens = new();
 
     public Guid Id { get; private set; }
+    public int Numero { get; private set; }
     public string Titulo { get; private set; } = null!;
     public string Descricao { get; private set; } = null!;
+    public CategoriaChamado Categoria { get; private set; }
     public StatusChamado Status { get; private set; }
     public Guid AlunoId { get; private set; }
     public Guid? AtendenteId { get; private set; }
@@ -18,7 +20,7 @@ public class Chamado
 
     private Chamado() { }
 
-    public Chamado(string titulo, string descricao, Guid alunoId)
+    public Chamado(string titulo, string descricao, CategoriaChamado categoria, Guid alunoId)
     {
         if (string.IsNullOrWhiteSpace(titulo))
             throw new ArgumentException("Título do chamado é obrigatório.", nameof(titulo));
@@ -32,6 +34,7 @@ public class Chamado
         Id = Guid.NewGuid();
         Titulo = titulo;
         Descricao = descricao;
+        Categoria = categoria;
         AlunoId = alunoId;
         Status = StatusChamado.Aberto;
         CriadoEm = DateTime.UtcNow;

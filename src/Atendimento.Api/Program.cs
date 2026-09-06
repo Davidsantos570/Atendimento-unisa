@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.Json.Serialization;
 using Atendimento.Api.Middlewares;
 using Atendimento.Api.Swagger;
 using Atendimento.Application.Interfaces;
@@ -15,7 +16,8 @@ using Microsoft.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(opcoes => opcoes.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(opcoes =>
 {

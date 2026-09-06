@@ -32,7 +32,6 @@ public class ChamadoRepository : IChamadoRepository
 
     public async Task AtualizarAsync(Chamado chamado)
     {
-        _dbContext.Chamados.Update(chamado);
         await _dbContext.SaveChangesAsync();
     }
 }

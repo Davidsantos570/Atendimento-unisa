@@ -1,8 +1,8 @@
 using Atendimento.Application.Auditoria;
 using Atendimento.Application.Autenticacao;
 using Atendimento.Application.DTOs;
-using Atendimento.Domain.Entities;
 using Atendimento.Application.Interfaces;
+using Atendimento.Domain.Entities;
 using Atendimento.Domain.Repositories;
 
 namespace Atendimento.Application.Services;
@@ -27,7 +27,7 @@ public class ChamadoService : IChamadoService
 
     public async Task<ChamadoDto> AbrirAsync(AbrirChamadoDto dto, Guid alunoId)
     {
-        var chamado = new Chamado(dto.Titulo, dto.Descricao, alunoId);
+        var chamado = new Chamado(dto.Titulo, dto.Descricao, dto.Categoria, alunoId);
         await _chamadoRepository.AdicionarAsync(chamado);
 
         await _auditoriaService.RegistrarAsync(
@@ -81,24 +81,38 @@ public class ChamadoService : IChamadoService
         return Mapear(chamado);
     }
 
-    public async Task<ChamadoDto> ResponderComIaAsync(Guid chamadoId, string mensagemAluno, Guid usuarioId, string papel)
+    public async Task<ChamadoDto> AdicionarMensagemAsync(Guid chamadoId, string autor, string texto, Guid usuarioId, string papel)
     {
         var chamado = await ObterOuFalharAsync(chamadoId);
-
-        chamado.AdicionarMensagem(nameof(Aluno), mensagemAluno);
-
-        var resposta = await _assistenteRespostaService.GerarRespostaAsync(chamado, mensagemAluno);
-        chamado.AdicionarMensagem(AutorAssistenteVirtual, resposta);
-
+        chamado.AdicionarMensagem(autor, texto);
         await _chamadoRepository.AtualizarAsync(chamado);
 
         await _auditoriaService.RegistrarAsync(
-            TiposDeEventoAuditoria.ChamadoRespostaIa,
-            $"IA respondeu no chamado {chamado.Id}.",
+            TiposDeEventoAuditoria.ChamadoMensagemEnviada,
+            $"Mensagem enviada no chamado {chamado.Id} por {autor}.",
             usuarioId,
             papel);
 
         return Mapear(chamado);
+    }
+
+    public async Task<string> SugerirRespostaIaAsync(Guid chamadoId, Guid usuarioId, string papel)
+    {
+        var chamado = await ObterOuFalharAsync(chamadoId);
+
+        var mensagemRecebida = chamado.Mensagens
+            .LastOrDefault(mensagem => mensagem.Autor != AutorAssistenteVirtual)
+            ?.Texto ?? chamado.Descricao;
+
+        var sugestao = await _assistenteRespostaService.GerarRespostaAsync(chamado, mensagemRecebida);
+
+        await _auditoriaService.RegistrarAsync(
+            TiposDeEventoAuditoria.ChamadoRespostaIa,
+            $"IA sugeriu uma resposta para o chamado {chamado.Id}.",
+            usuarioId,
+            papel);
+
+        return sugestao;
     }
 
     private async Task<Chamado> ObterOuFalharAsync(Guid chamadoId)
@@ -112,8 +126,10 @@ public class ChamadoService : IChamadoService
 
     private static ChamadoDto Mapear(Chamado chamado) => new(
         chamado.Id,
+        chamado.Numero,
         chamado.Titulo,
         chamado.Descricao,
+        chamado.Categoria,
         chamado.Status,
         chamado.AlunoId,
         chamado.AtendenteId,

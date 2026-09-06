@@ -4,8 +4,10 @@ namespace Atendimento.Application.DTOs;
 
 public record ChamadoDto(
     Guid Id,
+    int Numero,
     string Titulo,
     string Descricao,
+    CategoriaChamado Categoria,
     StatusChamado Status,
     Guid AlunoId,
     Guid? AtendenteId,
@@ -15,4 +17,8 @@ public record ChamadoDto(
 
 public record MensagemDto(string Autor, string Texto, DateTime EnviadaEm);
 
-public record AbrirChamadoDto(string Titulo, string Descricao);
+public record AbrirChamadoDto(string Titulo, string Descricao, CategoriaChamado Categoria);
+
+public record AdicionarMensagemDto(string Texto);
+
+public record SugestaoIaDto(string Sugestao);

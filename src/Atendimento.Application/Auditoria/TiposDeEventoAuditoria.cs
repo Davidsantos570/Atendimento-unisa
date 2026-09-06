@@ -7,6 +7,7 @@ public static class TiposDeEventoAuditoria
     public const string ChamadoIniciado = "ChamadoIniciado";
     public const string ChamadoConcluido = "ChamadoConcluido";
     public const string ChamadoRespostaIa = "ChamadoRespostaIa";
+    public const string ChamadoMensagemEnviada = "ChamadoMensagemEnviada";
     public const string UsuarioCriado = "UsuarioCriado";
     public const string Requisicao = "Requisicao";
 }
