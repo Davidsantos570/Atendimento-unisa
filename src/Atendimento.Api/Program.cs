@@ -78,6 +78,15 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization();
 
+const string PoliticaCorsFrontend = "FrontendDev";
+builder.Services.AddCors(opcoes =>
+{
+    opcoes.AddPolicy(PoliticaCorsFrontend, politica => politica
+        .WithOrigins("http://localhost:5173")
+        .AllowAnyHeader()
+        .AllowAnyMethod());
+});
+
 var app = builder.Build();
 
 app.UseMiddleware<RegistroDeRequisicaoMiddleware>();
@@ -90,6 +99,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseCors(PoliticaCorsFrontend);
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
