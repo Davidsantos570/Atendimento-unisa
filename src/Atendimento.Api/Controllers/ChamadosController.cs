@@ -51,7 +51,7 @@ public class ChamadosController : ControllerBase
     }
 
     [HttpPost("{id:guid}/iniciar-atendimento")]
-    [Authorize(Roles = Papeis.Atendente)]
+    [Authorize(Roles = $"{Papeis.Atendente},{Papeis.Admin}")]
     public async Task<ActionResult<ChamadoDto>> IniciarAtendimento(Guid id, [FromBody] IniciarAtendimentoDto dto)
     {
         var chamado = await _chamadoService.IniciarAtendimentoAsync(id, dto.AtendenteId);
@@ -59,7 +59,7 @@ public class ChamadosController : ControllerBase
     }
 
     [HttpPost("{id:guid}/concluir")]
-    [Authorize(Roles = Papeis.Atendente)]
+    [Authorize(Roles = $"{Papeis.Atendente},{Papeis.Admin}")]
     public async Task<ActionResult<ChamadoDto>> Concluir(Guid id)
     {
         var chamado = await _chamadoService.ConcluirAsync(id, ObterIdUsuarioAutenticado());
@@ -67,7 +67,7 @@ public class ChamadosController : ControllerBase
     }
 
     [HttpPost("{id:guid}/mensagens")]
-    [Authorize(Roles = $"{Papeis.Aluno},{Papeis.Atendente}")]
+    [Authorize(Roles = $"{Papeis.Aluno},{Papeis.Atendente},{Papeis.Admin}")]
     public async Task<ActionResult<ChamadoDto>> AdicionarMensagem(Guid id, [FromBody] AdicionarMensagemDto dto)
     {
         var autor = User.FindFirstValue(ClaimTypes.Name)!;
@@ -77,7 +77,7 @@ public class ChamadosController : ControllerBase
     }
 
     [HttpPost("{id:guid}/sugestao-ia")]
-    [Authorize(Roles = Papeis.Atendente)]
+    [Authorize(Roles = $"{Papeis.Atendente},{Papeis.Admin}")]
     public async Task<ActionResult<SugestaoIaDto>> SugerirRespostaIa(Guid id)
     {
         var papel = User.FindFirstValue(ClaimTypes.Role)!;

@@ -11,17 +11,26 @@ public class UsuarioService : IUsuarioService
     private readonly IAtendenteService _atendenteService;
     private readonly IConvidadoService _convidadoService;
     private readonly IChamadoRepository _chamadoRepository;
+    private readonly IAlunoRepository _alunoRepository;
+    private readonly IAtendenteRepository _atendenteRepository;
+    private readonly IConvidadoRepository _convidadoRepository;
     private readonly IAuditoriaService _auditoriaService;
 
     public UsuarioService(
         IAtendenteService atendenteService,
         IConvidadoService convidadoService,
         IChamadoRepository chamadoRepository,
+        IAlunoRepository alunoRepository,
+        IAtendenteRepository atendenteRepository,
+        IConvidadoRepository convidadoRepository,
         IAuditoriaService auditoriaService)
     {
         _atendenteService = atendenteService;
         _convidadoService = convidadoService;
         _chamadoRepository = chamadoRepository;
+        _alunoRepository = alunoRepository;
+        _atendenteRepository = atendenteRepository;
+        _convidadoRepository = convidadoRepository;
         _auditoriaService = auditoriaService;
     }
 
@@ -31,6 +40,20 @@ public class UsuarioService : IUsuarioService
         Papeis.Convidado => CriarConvidadoAsync(dto, solicitante),
         _ => throw new ArgumentException($"Papel '{dto.Papel}' inválido. Use '{Papeis.Atendente}' ou '{Papeis.Convidado}'.", nameof(dto))
     };
+
+    public async Task<IEnumerable<UsuarioResumoDto>> ListarTodosAsync()
+    {
+        var alunos = await _alunoRepository.ListarAsync();
+        var atendentes = await _atendenteRepository.ListarAsync();
+        var convidados = await _convidadoRepository.ListarAsync();
+
+        var resumos = new List<UsuarioResumoDto>();
+        resumos.AddRange(alunos.Select(a => new UsuarioResumoDto(a.Id, a.Nome, a.Email, Papeis.Aluno, a.Matricula)));
+        resumos.AddRange(atendentes.Select(a => new UsuarioResumoDto(a.Id, a.Nome, a.Email, Papeis.Atendente, a.Setor)));
+        resumos.AddRange(convidados.Select(c => new UsuarioResumoDto(c.Id, c.Nome, c.Email, Papeis.Convidado, c.ChamadoId.ToString())));
+
+        return resumos;
+    }
 
     private async Task<UsuarioCriadoDto> CriarAtendenteAsync(CriarUsuarioDto dto)
     {

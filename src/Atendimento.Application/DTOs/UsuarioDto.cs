@@ -5,3 +5,5 @@ public record CriarUsuarioDto(string Papel, string Nome, string Email, string Se
 public record UsuarioCriadoDto(Guid Id, string Nome, string Email, string Papel);
 
 public record SolicitanteDto(Guid Id, string Papel);
+
+public record UsuarioResumoDto(Guid Id, string Nome, string Email, string Papel, string? DetalheExtra);

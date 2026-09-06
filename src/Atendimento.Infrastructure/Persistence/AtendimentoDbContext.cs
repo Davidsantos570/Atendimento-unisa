@@ -11,6 +11,7 @@ public class AtendimentoDbContext : DbContext
     public DbSet<Atendente> Atendentes => Set<Atendente>();
     public DbSet<Chamado> Chamados => Set<Chamado>();
     public DbSet<Convidado> Convidados => Set<Convidado>();
+    public DbSet<Admin> Admins => Set<Admin>();
     public DbSet<RegistroAuditoria> RegistrosAuditoria => Set<RegistroAuditoria>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -74,6 +75,15 @@ public class AtendimentoDbContext : DbContext
                 .WithMany()
                 .HasForeignKey(c => c.ChamadoId)
                 .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<Admin>(builder =>
+        {
+            builder.HasKey(a => a.Id);
+            builder.Property(a => a.Nome).IsRequired().HasMaxLength(200);
+            builder.Property(a => a.Email).IsRequired().HasMaxLength(200);
+            builder.Property(a => a.SenhaHash).IsRequired().HasMaxLength(200);
+            builder.HasIndex(a => a.Email).IsUnique();
         });
 
         modelBuilder.Entity<RegistroAuditoria>(builder =>

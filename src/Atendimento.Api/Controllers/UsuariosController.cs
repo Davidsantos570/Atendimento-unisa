@@ -1,6 +1,8 @@
 using System.Security.Claims;
+using Atendimento.Application.Autenticacao;
 using Atendimento.Application.DTOs;
 using Atendimento.Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Atendimento.Api.Controllers;
@@ -21,6 +23,14 @@ public class UsuariosController : ControllerBase
     {
         var usuario = await _usuarioService.CriarAsync(dto, ObterSolicitanteAutenticado());
         return CreatedAtAction(nameof(Criar), new { id = usuario.Id }, usuario);
+    }
+
+    [HttpGet]
+    [Authorize(Roles = Papeis.Admin)]
+    public async Task<ActionResult<IEnumerable<UsuarioResumoDto>>> Listar()
+    {
+        var usuarios = await _usuarioService.ListarTodosAsync();
+        return Ok(usuarios);
     }
 
     private SolicitanteDto? ObterSolicitanteAutenticado()

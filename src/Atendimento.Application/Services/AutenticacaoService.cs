@@ -11,6 +11,7 @@ public class AutenticacaoService : IAutenticacaoService
     private readonly IAlunoRepository _alunoRepository;
     private readonly IAtendenteRepository _atendenteRepository;
     private readonly IConvidadoRepository _convidadoRepository;
+    private readonly IAdminRepository _adminRepository;
     private readonly IHashDeSenha _hashDeSenha;
     private readonly IGeradorDeToken _geradorDeToken;
     private readonly IAuditoriaService _auditoriaService;
@@ -19,6 +20,7 @@ public class AutenticacaoService : IAutenticacaoService
         IAlunoRepository alunoRepository,
         IAtendenteRepository atendenteRepository,
         IConvidadoRepository convidadoRepository,
+        IAdminRepository adminRepository,
         IHashDeSenha hashDeSenha,
         IGeradorDeToken geradorDeToken,
         IAuditoriaService auditoriaService)
@@ -26,6 +28,7 @@ public class AutenticacaoService : IAutenticacaoService
         _alunoRepository = alunoRepository;
         _atendenteRepository = atendenteRepository;
         _convidadoRepository = convidadoRepository;
+        _adminRepository = adminRepository;
         _hashDeSenha = hashDeSenha;
         _geradorDeToken = geradorDeToken;
         _auditoriaService = auditoriaService;
@@ -33,6 +36,10 @@ public class AutenticacaoService : IAutenticacaoService
 
     public async Task<TokenDto> LoginAsync(LoginDto dto)
     {
+        var admin = await _adminRepository.ObterPorEmailAsync(dto.Email);
+        if (admin is not null && _hashDeSenha.VerificarSenha(dto.Senha, admin.SenhaHash))
+            return await GerarTokenComAuditoriaAsync(admin.Id, admin.Email, admin.Nome, Papeis.Admin, chamadoId: null);
+
         var aluno = await _alunoRepository.ObterPorEmailAsync(dto.Email);
         if (aluno is not null && _hashDeSenha.VerificarSenha(dto.Senha, aluno.SenhaHash))
             return await GerarTokenComAuditoriaAsync(aluno.Id, aluno.Email, aluno.Nome, Papeis.Aluno, chamadoId: null);

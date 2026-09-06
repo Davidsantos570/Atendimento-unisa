@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Atendimento.Api.Controllers;
 
 [ApiController]
-[Authorize(Roles = Papeis.Atendente)]
+[Authorize(Roles = $"{Papeis.Atendente},{Papeis.Admin}")]
 [Route("api/auditoria")]
 public class AuditoriaController : ControllerBase
 {

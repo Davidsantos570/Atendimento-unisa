@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 using Atendimento.Api.Middlewares;
 using Atendimento.Api.Swagger;
 using Atendimento.Application.Interfaces;
+using Atendimento.Domain.Entities;
 using Atendimento.Application.Services;
 using Atendimento.Domain.Repositories;
 using Atendimento.Infrastructure.IA;
@@ -43,6 +44,7 @@ builder.Services.AddScoped<IChamadoRepository, ChamadoRepository>();
 builder.Services.AddScoped<IAlunoRepository, AlunoRepository>();
 builder.Services.AddScoped<IAtendenteRepository, AtendenteRepository>();
 builder.Services.AddScoped<IConvidadoRepository, ConvidadoRepository>();
+builder.Services.AddScoped<IAdminRepository, AdminRepository>();
 builder.Services.AddScoped<IChamadoService, ChamadoService>();
 builder.Services.AddScoped<IAlunoService, AlunoService>();
 builder.Services.AddScoped<IAtendenteService, AtendenteService>();
@@ -103,4 +105,24 @@ app.UseCors(PoliticaCorsFrontend);
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+
+using (var escopoSeed = app.Services.CreateScope())
+{
+    var adminRepository = escopoSeed.ServiceProvider.GetRequiredService<IAdminRepository>();
+
+    if (!await adminRepository.ExisteAlgumAsync())
+    {
+        var emailAdmin = app.Configuration["AdminSeed:Email"];
+        var senhaAdmin = app.Configuration["AdminSeed:Senha"];
+
+        if (!string.IsNullOrWhiteSpace(emailAdmin) && !string.IsNullOrWhiteSpace(senhaAdmin))
+        {
+            var nomeAdmin = app.Configuration["AdminSeed:Nome"] ?? "Administrador";
+            var hashDeSenha = escopoSeed.ServiceProvider.GetRequiredService<IHashDeSenha>();
+            var admin = new Admin(nomeAdmin, emailAdmin, hashDeSenha.GerarHash(senhaAdmin));
+            await adminRepository.AdicionarAsync(admin);
+        }
+    }
+}
+
 app.Run();

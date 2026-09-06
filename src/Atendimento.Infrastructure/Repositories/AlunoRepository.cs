@@ -19,6 +19,8 @@ public class AlunoRepository : IAlunoRepository
     public async Task<Aluno?> ObterPorEmailAsync(string email) =>
         await _dbContext.Alunos.FirstOrDefaultAsync(aluno => aluno.Email == email);
 
+    public async Task<IEnumerable<Aluno>> ListarAsync() => await _dbContext.Alunos.ToListAsync();
+
     public async Task AdicionarAsync(Aluno aluno)
     {
         await _dbContext.Alunos.AddAsync(aluno);

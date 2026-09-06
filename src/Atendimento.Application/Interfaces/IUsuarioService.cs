@@ -5,4 +5,5 @@ namespace Atendimento.Application.Interfaces;
 public interface IUsuarioService
 {
     Task<UsuarioCriadoDto> CriarAsync(CriarUsuarioDto dto, SolicitanteDto? solicitante);
+    Task<IEnumerable<UsuarioResumoDto>> ListarTodosAsync();
 }

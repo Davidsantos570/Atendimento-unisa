@@ -19,6 +19,8 @@ public class ConvidadoRepository : IConvidadoRepository
     public async Task<Convidado?> ObterPorEmailAsync(string email) =>
         await _dbContext.Convidados.FirstOrDefaultAsync(convidado => convidado.Email == email);
 
+    public async Task<IEnumerable<Convidado>> ListarAsync() => await _dbContext.Convidados.ToListAsync();
+
     public async Task AdicionarAsync(Convidado convidado)
     {
         await _dbContext.Convidados.AddAsync(convidado);

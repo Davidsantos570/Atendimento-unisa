@@ -19,6 +19,8 @@ public class AtendenteRepository : IAtendenteRepository
     public async Task<Atendente?> ObterPorEmailAsync(string email) =>
         await _dbContext.Atendentes.FirstOrDefaultAsync(atendente => atendente.Email == email);
 
+    public async Task<IEnumerable<Atendente>> ListarAsync() => await _dbContext.Atendentes.ToListAsync();
+
     public async Task AdicionarAsync(Atendente atendente)
     {
         await _dbContext.Atendentes.AddAsync(atendente);
